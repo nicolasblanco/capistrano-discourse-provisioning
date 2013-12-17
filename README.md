@@ -1,5 +1,7 @@
 # Rails provisioning (standalone server)
 
+Tested on latest Ubuntu LTS (currently 12.04).
+
 This is is a fairly simple puppet script to provision an Ubuntu server with the following components:
 
 - UFW & Denyhosts for security (only ports 22/80 are opened)
@@ -8,8 +10,6 @@ This is is a fairly simple puppet script to provision an Ubuntu server with the 
 - Postgresql
 - Nginx
 - A single user `deployer`
-
-In general, it follows the manual approach given in [Railscast #335](http://railscasts.com/episodes/335-deploying-to-a-vps)
 
 ## Instructions
 
