@@ -72,44 +72,44 @@ group { 'admin' :
 }
 
 # Setup the user accounts
-user { 'deployer' :
+user { 'web' :
   ensure => present,
   groups => 'admin',
   shell => '/bin/bash',
   managehome => true,
-  home => '/home/deployer',
+  home => '/home/web',
   password => $user_password,
   require => Group['admin']
 }
 
-file { '/home/deployer/.ssh' :
-  owner => 'deployer',
-  group => 'deployer',
+file { '/home/web/.ssh' :
+  owner => 'web',
+  group => 'web',
   mode => 700,
   ensure => 'directory',
 }
 
-file { '/home/deployer/.ssh/known_hosts' :
-  owner => 'deployer',
-  group => 'deployer',
+file { '/home/web/.ssh/known_hosts' :
+  owner => 'web',
+  group => 'web',
   mode => 644,
   source => 'puppet:///files/known_hosts',
   ensure => present,
-  require => User['deployer'],
+  require => User['web'],
 }
 
 
 # Setup rbenv
-rbenv::install { 'deployer' :
-  require => User['deployer'],
+rbenv::install { 'web' :
+  require => User['web'],
 }
 
 
 rbenv::compile { "2.0.0-p353":
-  user => 'deployer',
-  home => "/home/deployer",
+  user => 'web',
+  home => "/home/web",
   global => true,
-  require => User['deployer'],
+  require => User['web'],
 }
 
 # Configure postgres
@@ -131,28 +131,28 @@ postgresql::server::db { $db_name :
 }
 
 # Create the application directory
-file { "/home/deployer/$app_name" :
+file { "/home/web/$app_name" :
   ensure => 'directory',
-  owner => 'deployer',
-  group => 'deployer',
+  owner => 'web',
+  group => 'web',
   mode => 755,
-  require => User['deployer'],
+  require => User['web'],
 }
 
-file { "/home/deployer/$app_name/releases" :
+file { "/home/web/$app_name/releases" :
   ensure => 'directory',
-  owner => 'deployer',
-  group => 'deployer',
+  owner => 'web',
+  group => 'web',
   mode => 755,
-  require => File["/home/deployer/$app_name"],
+  require => File["/home/web/$app_name"],
 }
 
-file { "/home/deployer/$app_name/shared" :
+file { "/home/web/$app_name/shared" :
   ensure => 'directory',
-  owner => 'deployer',
-  group => 'deployer',
+  owner => 'web',
+  group => 'web',
   mode => 755,
-  require => File["/home/deployer/$app_name"],
+  require => File["/home/web/$app_name"],
 }
 
 service { "nginx" :
@@ -177,8 +177,8 @@ file { "/etc/nginx/sites-available/default" :
 }
 
 class { 'sudo': }
-sudo::conf { 'deployer_sudo':
+sudo::conf { 'web_sudo':
   priority => 10,
-  content  => 'deployer ALL=(ALL) NOPASSWD: ALL',
+  content  => 'web ALL=(ALL) NOPASSWD: ALL',
 }
 

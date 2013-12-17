@@ -9,7 +9,7 @@ This is is a fairly simple puppet script to provision an Ubuntu server with the 
 - Ruby 2.0
 - Postgresql
 - Nginx
-- A single user `deployer`
+- A single user `web`
 
 ## Instructions
 
@@ -27,6 +27,6 @@ Done!
 
 You'll need setup Capistrano to complete this installation (nginx configu files, gems, unicorn_init etc).
 
-    cat ~/.ssh/id_rsa.pub | ssh deployer@178.79.177.190 "cat >> ~/.ssh/authorized_keys"
+    cat ~/.ssh/id_rsa.pub | ssh web@178.79.177.190 "cat >> ~/.ssh/authorized_keys"
     cap deploy:setup
     cap deploy
