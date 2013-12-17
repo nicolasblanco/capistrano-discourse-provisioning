@@ -91,7 +91,7 @@ rbenv::install { 'deployer' :
 }
 
 
-rbenv::compile { "1.9.3-p194":
+rbenv::compile { "2.0.0-p353":
   user => 'deployer',
   home => "/home/deployer",
   global => true,
