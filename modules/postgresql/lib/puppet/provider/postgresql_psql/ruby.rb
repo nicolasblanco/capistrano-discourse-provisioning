@@ -16,15 +16,9 @@ Puppet::Type.type(:postgresql_psql).provide(:ruby) do
       return nil
     end
 
-    if Puppet::PUPPETVERSION.to_f < 4
-      output, status = run_unless_sql_command(resource[:unless])
-    else
-      output = run_unless_sql_command(resource[:unless])
-      status = output.exitcode
-    end
+    output, status = run_unless_sql_command(resource[:unless])
 
     if status != 0
-      puts status
       self.fail("Error evaluating 'unless' clause: '#{output}'")
     end
     result_count = output.strip.to_i
@@ -67,24 +61,10 @@ Puppet::Type.type(:postgresql_psql).provide(:ruby) do
 
     if resource[:cwd]
       Dir.chdir resource[:cwd] do
-        run_command(command, resource[:psql_user], resource[:psql_group])
+        Puppet::Util::SUIDManager.run_and_capture(command, resource[:psql_user], resource[:psql_group])
       end
     else
-      run_command(command, resource[:psql_user], resource[:psql_group])
-    end
-  end
-
-  def run_command(command, user, group)
-    if Puppet::PUPPETVERSION.to_f < 4
       Puppet::Util::SUIDManager.run_and_capture(command, resource[:psql_user], resource[:psql_group])
-    else
-      Puppet::Util::Execution.execute(command, {:uid => resource[:psql_user],
-        :gid => resource[:psql_group],
-        :failonfail=>false,
-        :combine=>true,
-        :override_locale=>true,
-        :custom_environment=>{}
-      })
     end
   end
 
