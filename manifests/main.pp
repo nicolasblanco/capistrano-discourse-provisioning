@@ -112,7 +112,7 @@ class { 'postgresql::server':
 }
 
 # Create the database
-postgresql::db { $db_name :
+postgresql::server::db { $db_name :
   user     => $db_user,
   password => $db_password,
   require => Package['postgresql']
