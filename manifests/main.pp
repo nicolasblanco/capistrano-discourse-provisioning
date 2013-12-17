@@ -14,6 +14,20 @@ apt::ppa { "ppa:nginx/stable" :}
 apt::ppa { "ppa:pitti/postgresql" :}
 apt::ppa { "ppa:chris-lea/node.js" :}
 
+# Security : only allow ssh and http and installs deny hosts
+
+include ufw
+
+ufw::allow { "allow-ssh-from-all":
+  port => 22,
+}
+
+ufw::allow { "allow-http-from-all":
+  port => 80,
+}
+
+class { "denyhosts": }
+
 # Install required packages
 package { 'curl' :
   ensure => present,
