@@ -1,0 +1,10 @@
+task :provisioning do |host|
+  on roles(:app), in: :parallel do
+    execute "sudo apt-get install -y git"
+    execute "rm -rf /etc/puppet"
+    execute "sudo git clone https://github.com/slainer68/my-rails-puppet.git /etc/puppet"
+    execute "sudo sh /etc/puppet/install_puppet.sh"
+
+    execute "sudo puppet apply /etc/puppet/manifests/main.pp"
+  end
+end
