@@ -1,9 +1,9 @@
-# Rails provisioning
+# Rails provisioning (standalone server)
 
 This is is a fairly simple puppet script to provision an Ubuntu server with the following components:
 
 - rbenv
-- Ruby 1.9.3-p194
+- Ruby 2.0
 - Postgresql
 - Nginx
 - A single user `deployer`
