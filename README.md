@@ -13,7 +13,7 @@ In general, it follows the manual approach given in [Railscast #335](http://rail
 ## Instructions
 
     apt-get install -y git
-    git clone https://github.com/ideasasylum/my-rails-puppet.git /etc/puppet
+    git clone https://github.com/slainer68/my-rails-puppet.git /etc/puppet
     . /etc/puppet/install_puppet.sh
 
 Edit `/etc/puppet/manifests/config.pp` with the correct variables
