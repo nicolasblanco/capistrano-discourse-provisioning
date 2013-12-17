@@ -1,0 +1,34 @@
+user www-data;
+worker_processes 4;
+pid /run/nginx.pid;
+
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+
+http {
+  server {
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+
+    # Make site accessible from http://localhost/
+    server_name localhost;
+
+    location / {
+      # First attempt to serve request as file, then
+      # as directory, then fall back to displaying a 404.
+      try_files $uri $uri/ /index.html;
+      # Uncomment to enable naxsi on this location
+      # include /etc/nginx/naxsi.rules
+    }
+
+    location /doc/ {
+      alias /usr/share/doc/;
+      autoindex on;
+      allow 127.0.0.1;
+      allow ::1;
+      deny all;
+    }
+  }
+}
