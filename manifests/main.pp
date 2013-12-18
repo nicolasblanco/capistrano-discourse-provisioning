@@ -33,6 +33,10 @@ package { 'curl' :
   ensure => present
 }
 
+package { 'libcurl4-openssl-dev' :
+  ensure => present
+}
+
 package { 'git' :
   name => 'git-core',
   ensure => present
@@ -112,7 +116,7 @@ rbenv::compile { "2.0.0-p353":
   require => User['web']
 }
 
-rbenv::gem { "passenger":
+rbenv::gem { "passenger" :
   user => "web",
   ruby => "2.0.0-p353"
 }
