@@ -171,14 +171,14 @@ file { "/home/$user_name/$app_name/shared" :
 }
 
 file { "/etc/init.d/nginx" :
-    source  => "puppet:///files/nginx.init.d"
+    source  => "puppet:///files/nginx.init.d",
     owner   => root,
     group   => root,
     mode    => 755
 }
 
 file { "/etc/default/nginx" :
-    content => template("default/nginx")
+    content => template("default/nginx"),
     owner   => root,
     group   => root,
     mode    => 755
