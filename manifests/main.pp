@@ -19,27 +19,27 @@ apt::ppa { "ppa:chris-lea/node.js" :}
 include ufw
 
 ufw::allow { "allow-ssh-from-all":
-  port => 22,
+  port => 22
 }
 
 ufw::allow { "allow-http-from-all":
-  port => 80,
+  port => 80
 }
 
 class { "denyhosts": }
 
 # Install required packages
 package { 'curl' :
-  ensure => present,
+  ensure => present
 }
 
 package { 'git' :
   name => 'git-core',
-  ensure => present,
+  ensure => present
 }
 
 package { 'python-software-properties' :
-  ensure => present,
+  ensure => present
 }
 
 package { "nginx" :
@@ -59,16 +59,16 @@ package { 'libpq-dev' :
 
 # Install ImageMagick as it often cause problems with bundle install
 package { 'libmagickcore-dev' :
-  ensure => present,
+  ensure => present
 }
 
 package { 'libmagickwand-dev' :
-  ensure => present,
+  ensure => present
 }
 
 
 group { 'admin' :
-  ensure => present,
+  ensure => present
 }
 
 # Setup the user accounts
@@ -86,7 +86,7 @@ file { '/home/web/.ssh' :
   owner => 'web',
   group => 'web',
   mode => 700,
-  ensure => 'directory',
+  ensure => 'directory'
 }
 
 file { '/home/web/.ssh/known_hosts' :
@@ -95,13 +95,13 @@ file { '/home/web/.ssh/known_hosts' :
   mode => 644,
   source => 'puppet:///files/known_hosts',
   ensure => present,
-  require => User['web'],
+  require => User['web']
 }
 
 
 # Setup rbenv
 rbenv::install { 'web' :
-  require => User['web'],
+  require => User['web']
 }
 
 
@@ -109,8 +109,19 @@ rbenv::compile { "2.0.0-p353":
   user => 'web',
   home => "/home/web",
   global => true,
-  require => User['web'],
+  require => User['web']
 }
+
+rbenv::gem { "bundler":
+  user => "web",
+  ruby => "2.0.0-p353"
+}
+
+rbenv::gem { "passenger":
+  user => "web",
+  ruby => "2.0.0-p353"
+}
+
 
 # Configure postgres
 class { 'postgresql::server':
@@ -120,7 +131,7 @@ class { 'postgresql::server':
   ipv4acls                   => [ 'local   all             postgres                                peer',
                                       'local   all             all                                     md5',
                                       'host    all             all             127.0.0.1/32            md5',
-                                      'host    all             all             10.0.2.2/32             md5'],
+                                      'host    all             all             10.0.2.2/32             md5']
 }
 
 # Create the database
@@ -144,7 +155,7 @@ file { "/home/web/$app_name/releases" :
   owner => 'web',
   group => 'web',
   mode => 755,
-  require => File["/home/web/$app_name"],
+  require => File["/home/web/$app_name"]
 }
 
 file { "/home/web/$app_name/shared" :
@@ -152,20 +163,20 @@ file { "/home/web/$app_name/shared" :
   owner => 'web',
   group => 'web',
   mode => 755,
-  require => File["/home/web/$app_name"],
+  require => File["/home/web/$app_name"]
 }
 
 service { "nginx" :
     ensure  => "running",
     enable  => "true",
-    require => Package["nginx"],
+    require => Package["nginx"]
 }
 
 file { "/etc/nginx/nginx.conf" :
   source => 'puppet:///files/nginx.conf',
   mode => 644,
   owner => 'root',
-  require => Package['nginx'],
+  require => Package['nginx']
 }
 
 file { "/etc/nginx/sites-available/default" :
@@ -173,12 +184,12 @@ file { "/etc/nginx/sites-available/default" :
   mode => 644,
   owner => 'root',
   notify => Service['nginx'],
-  require => File['/etc/nginx/nginx.conf'],
+  require => File['/etc/nginx/nginx.conf']
 }
 
 class { 'sudo': }
 sudo::conf { 'web_sudo':
   priority => 10,
-  content  => 'web ALL=(ALL) NOPASSWD: ALL',
+  content  => 'web ALL=(ALL) NOPASSWD: ALL'
 }
 
