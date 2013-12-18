@@ -3,7 +3,11 @@ task :provisioning do |host|
     execute "sudo apt-get install -y git"
     execute "rm -rf /etc/puppet"
     execute "sudo git clone https://github.com/slainer68/my-rails-puppet.git /etc/puppet"
-    execute "sudo sh /etc/puppet/install_puppet.sh"
+
+    execute "wget http://apt.puppetlabs.com/puppetlabs-release-precise.deb"
+    execute "sudo dpkg -i puppetlabs-release-precise.deb"
+    execute "sudo apt-get update"
+    execute "sudo apt-get install -y puppet-common"
 
     execute "sudo puppet apply /etc/puppet/manifests/main.pp"
   end
