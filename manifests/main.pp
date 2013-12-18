@@ -112,11 +112,6 @@ rbenv::compile { "2.0.0-p353":
   require => User['web']
 }
 
-rbenv::gem { "bundler":
-  user => "web",
-  ruby => "2.0.0-p353"
-}
-
 rbenv::gem { "passenger":
   user => "web",
   ruby => "2.0.0-p353"
