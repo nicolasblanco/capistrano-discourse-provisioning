@@ -189,13 +189,13 @@ service { "nginx" :
     enable  => "true"
 }
 
-file { "/etc/nginx/sites-available/default" :
-  source => 'puppet:///files/nginx-default',
-  mode => 644,
-  owner => 'root',
-  notify => Service['nginx'],
-  require => File['/etc/nginx/nginx.conf']
-}
+# file { "/etc/nginx/sites-available/default" :
+#   source => 'puppet:///files/nginx-default',
+#   mode => 644,
+#   owner => 'root',
+#   notify => Service['nginx'],
+#   require => File['/etc/nginx/nginx.conf']
+# }
 
 class { 'sudo': }
 
