@@ -1,5 +1,5 @@
 DESCRIPTION="My Awesome Nginx Server..."
 
-DAEMON=/home/<%= $user_name %>/nginx/sbin/nginx
-NGINX_CONF_FILE=/home/<%= $user_name %>/nginx/conf/nginx.conf
-PIDSPATH=/home/<%= $user_name %>/nginx/logs
+DAEMON=/home/<%= user_name %>/nginx/sbin/nginx
+NGINX_CONF_FILE=/home/<%= user_name %>/nginx/conf/nginx.conf
+PIDSPATH=/home/<%= user_name %>/nginx/logs
