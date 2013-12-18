@@ -1,5 +1,8 @@
 import 'config.pp'
 
+$passenger_nginx_install_dir = "/home/${user_name}/nginx"
+$passenger_nginx_options = "--auto --auto-download --prefix=${passenger_nginx_install_dir}"
+
 class { 'apt':
   always_apt_update    => true,
   disable_keys         => undef,
@@ -76,49 +79,56 @@ group { 'admin' :
 }
 
 # Setup the user accounts
-user { 'web' :
+user { $user_name :
   ensure => present,
   groups => 'admin',
   shell => '/bin/bash',
   managehome => true,
-  home => '/home/web',
+  home => "/home/$user_name",
   password => $user_password,
   require => Group['admin']
 }
 
-file { '/home/web/.ssh' :
-  owner => 'web',
-  group => 'web',
+file { "/home/$user_name/.ssh" :
+  owner => "$user_name",
+  group => "$user_name",
   mode => 700,
   ensure => 'directory'
 }
 
-file { '/home/web/.ssh/known_hosts' :
-  owner => 'web',
-  group => 'web',
+file { "/home/$user_name/.ssh/known_hosts" :
+  owner => "$user_name",
+  group => "$user_name",
   mode => 644,
   source => 'puppet:///files/known_hosts',
   ensure => present,
-  require => User['web']
+  require => User[$user_name]
 }
 
 
 # Setup rbenv
-rbenv::install { 'web' :
-  require => User['web']
+rbenv::install { $user_name :
+  require => User[$user_name]
 }
 
 
-rbenv::compile { "2.0.0-p353":
-  user => 'web',
-  home => "/home/web",
+rbenv::compile { $ruby_version :
+  user => $user_name,
+  home => "/home/$user_name",
   global => true,
-  require => User['web']
+  require => User[$user_name]
 }
 
 rbenv::gem { "passenger" :
-  user => "web",
-  ruby => "2.0.0-p353"
+  user => $user_name,
+  ruby => $ruby_version
+}
+
+exec { 'nginx-install':
+  command => "/bin/bash -l -i -c \"/home/${user_name}/.rbenv/versions/${ruby_version}/bin/passenger-install-nginx-module ${passenger_nginx_options}\"",
+  user    => $user_name,
+  group   => $user_name,
+  #unless  => "/usr/bin/test -d ${installdir}"
 }
 
 
@@ -141,28 +151,28 @@ postgresql::server::db { $db_name :
 }
 
 # Create the application directory
-file { "/home/web/$app_name" :
+file { "/home/$user_name/$app_name" :
   ensure => 'directory',
-  owner => 'web',
-  group => 'web',
+  owner => $user_name,
+  group => $user_name,
   mode => 755,
-  require => User['web'],
+  require => User[$user_name],
 }
 
-file { "/home/web/$app_name/releases" :
+file { "/home/$user_name/$app_name/releases" :
   ensure => 'directory',
-  owner => 'web',
-  group => 'web',
+  owner => $user_name,
+  group => $user_name,
   mode => 755,
-  require => File["/home/web/$app_name"]
+  require => File["/home/$user_name/$app_name"]
 }
 
-file { "/home/web/$app_name/shared" :
+file { "/home/$user_name/$app_name/shared" :
   ensure => 'directory',
-  owner => 'web',
-  group => 'web',
+  owner => $user_name,
+  group => $user_name,
   mode => 755,
-  require => File["/home/web/$app_name"]
+  require => File["/home/$user_name/$app_name"]
 }
 
 service { "nginx" :
@@ -187,8 +197,8 @@ file { "/etc/nginx/sites-available/default" :
 }
 
 class { 'sudo': }
-sudo::conf { 'web_sudo':
-  priority => 10,
-  content  => 'web ALL=(ALL) NOPASSWD: ALL'
-}
 
+sudo::conf { $user_name :
+  priority => 10,
+  content  => "$user_name ALL=(ALL) NOPASSWD: ALL"
+}

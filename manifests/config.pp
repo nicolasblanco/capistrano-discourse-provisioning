@@ -1,6 +1,8 @@
 # Copy and rename this config file as config.pp
 
 $app_name = 'myapp'
+$user_name = 'web'
+$ruby_version = "2.0.0-p353"
 
 # Generate your password hash using: openssl passwd -1
 $user_password = 'your secret password hash'
