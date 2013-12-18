@@ -89,16 +89,6 @@ file { "/home/$user_name/.ssh" :
   ensure => 'directory'
 }
 
-file { "/home/$user_name/.ssh/known_hosts" :
-  owner => "$user_name",
-  group => "$user_name",
-  mode => 644,
-  source => 'puppet:///files/known_hosts',
-  ensure => present,
-  require => User[$user_name]
-}
-
-
 # Setup rbenv
 rbenv::install { $user_name :
   require => User[$user_name]
@@ -170,34 +160,56 @@ file { "/home/$user_name/$app_name/shared" :
   require => File["/home/$user_name/$app_name"]
 }
 
+file { "/home/$user_name/bin/ruby" :
+  content => template("ruby"),
+  owner => $user_name,
+  group => $user_name,
+  require => User[$user_name],
+  mode => 755
+}
+
 file { "/etc/init.d/nginx" :
-    source  => "puppet:///files/nginx.init.d",
-    owner   => root,
-    group   => root,
-    mode    => 755
+  source  => "puppet:///files/nginx.init.d",
+  owner   => root,
+  group   => root,
+  mode    => 755
 }
 
 file { "/etc/default/nginx" :
-    content => template("default/nginx"),
-    owner   => root,
-    group   => root,
-    mode    => 755
+  content => template("default/nginx"),
+  owner   => root,
+  group   => root,
+  mode    => 755
 }
+
+file { "/home/${user_name}/nginx/conf/nginx.conf" :
+  content => template("nginx.conf"),
+  owner   => $user_name,
+  group   => $user_name
+}
+
+file { "/home/$user_name/nginx/conf/sites-available/default" :
+  content => template("sites-available/default"),
+  owner => $user_name,
+  group => $user_name,
+  require => User[$user_name]
+}
+
+file { "/home/$user_name/nginx/conf/sites-enabled/default" :
+  ensure => "link",
+  target => "/home/$user_name/nginx/conf/sites-available/default",
+  owner => $user_name,
+  group => $user_name,
+  require => File["/home/$user_name/nginx/conf/sites-available/default"]
+}
+
 
 service { "nginx" :
-    ensure  => "running",
-    enable  => "true"
+  ensure  => "running",
+  enable  => "true"
 }
 
-# file { "/etc/nginx/sites-available/default" :
-#   source => 'puppet:///files/nginx-default',
-#   mode => 644,
-#   owner => 'root',
-#   notify => Service['nginx'],
-#   require => File['/etc/nginx/nginx.conf']
-# }
-
-class { 'sudo': }
+class { 'sudo' : }
 
 sudo::conf { $user_name :
   priority => 10,
