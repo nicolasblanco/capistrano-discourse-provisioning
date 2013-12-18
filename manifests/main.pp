@@ -13,9 +13,7 @@ class { 'apt':
   purge_preferences_d  => false
 }
 
-apt::ppa { "ppa:nginx/stable" :}
 apt::ppa { "ppa:pitti/postgresql" :}
-apt::ppa { "ppa:chris-lea/node.js" :}
 
 # Security : only allow ssh and http and installs deny hosts
 
@@ -47,11 +45,6 @@ package { 'git' :
 
 package { 'python-software-properties' :
   ensure => present
-}
-
-package { "nginx" :
-  ensure => present,
-  require => Apt::Ppa["ppa:nginx/stable"]
 }
 
 package { 'postgresql' :
@@ -158,7 +151,7 @@ file { "/home/$user_name/$app_name" :
   owner => $user_name,
   group => $user_name,
   mode => 755,
-  require => User[$user_name],
+  require => User[$user_name]
 }
 
 file { "/home/$user_name/$app_name/releases" :
@@ -177,17 +170,23 @@ file { "/home/$user_name/$app_name/shared" :
   require => File["/home/$user_name/$app_name"]
 }
 
-service { "nginx" :
-    ensure  => "running",
-    enable  => "true",
-    require => Package["nginx"]
+file { "/etc/init.d/nginx" :
+    source  => "puppet:///files/nginx.init.d"
+    owner   => root,
+    group   => root,
+    mode    => 755
 }
 
-file { "/etc/nginx/nginx.conf" :
-  source => 'puppet:///files/nginx.conf',
-  mode => 644,
-  owner => 'root',
-  require => Package['nginx']
+file { "/etc/default/nginx" :
+    content => template("default/nginx")
+    owner   => root,
+    group   => root,
+    mode    => 755
+}
+
+service { "nginx" :
+    ensure  => "running",
+    enable  => "true"
 }
 
 file { "/etc/nginx/sites-available/default" :
