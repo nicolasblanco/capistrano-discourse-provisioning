@@ -128,8 +128,8 @@ exec { 'nginx-install' :
   command => "/bin/bash -l -i -c \"export HOME=/home/${user_name} && source /home/${user_name}/.profile && /home/${user_name}/.rbenv/shims/passenger-install-nginx-module ${passenger_nginx_options}\"",
   user    => $user_name,
   group   => $user_name,
-  cwd     => "/home/${user_name}"
-  #unless  => "/usr/bin/test -d ${installdir}"
+  cwd     => "/home/${user_name}",
+  unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}"
 }
 
 
