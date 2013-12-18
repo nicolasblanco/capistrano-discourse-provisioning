@@ -125,7 +125,7 @@ rbenv::gem { "passenger" :
 }
 
 exec { 'nginx-install':
-  command => "/bin/bash -l -i -c \"/home/${user_name}/.rbenv/versions/${ruby_version}/bin/passenger-install-nginx-module ${passenger_nginx_options}\"",
+  command => "/home/${user_name}/.rbenv/versions/${ruby_version}/bin/passenger-install-nginx-module ${passenger_nginx_options}",
   user    => $user_name,
   group   => $user_name,
   #unless  => "/usr/bin/test -d ${installdir}"
