@@ -188,6 +188,20 @@ file { "/home/${user_name}/nginx/conf/nginx.conf" :
   group   => $user_name
 }
 
+file { "/home/$user_name/nginx/conf/sites-available" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755
+}
+
+file { "/home/$user_name/nginx/conf/sites-enabled" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755
+}
+
 file { "/home/$user_name/nginx/conf/sites-available/default" :
   content => template("sites-available/default"),
   owner => $user_name,
