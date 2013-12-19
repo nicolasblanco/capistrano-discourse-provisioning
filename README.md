@@ -17,8 +17,8 @@ This is is a Capistrano script combined with a Puppet script to provision an Ubu
 
 * Create config/deploy/production.rb using the sample file with the good server data. Be sure you can access to your server using the credentials in this file without having to type a password, ie. : by putting your public SSH key in ~/.ssh/authorized_keys, otherwise Capistrano will fail.
 
-    $> bundle install
+        $> bundle install
 
-    $> bin/cap production provisioning
+        $> bin/cap production provisioning
 
 Done!
