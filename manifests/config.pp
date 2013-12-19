@@ -1,6 +1,6 @@
 # Copy and rename this config file as config.pp
 
-$app_name = 'myapp'
+$app_name = 'app'
 $user_name = 'web'
 $ruby_version = "2.0.0-p353"
 

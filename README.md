@@ -2,14 +2,16 @@
 
 Tested on latest Ubuntu LTS (currently 12.04).
 
+Perfect to setup a CI server/Redmine/Discourse in a few minutes...
+
 This is is a fairly simple puppet script to provision an Ubuntu server with the following components:
 
 - ufw & denyhosts for security (only ports 22/80 are opened)
-- rbenv
-- Ruby 2.0
 - postgresql
-- nginx
 - A single user `web`
+- rbenv locally
+- ruby 2.0
+- nginx with passenger locally compiled in ~/nginx, application served from ~/app/current
 
 ## Instructions
 
