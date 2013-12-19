@@ -160,6 +160,13 @@ file { "/home/$user_name/$app_name/shared" :
   require => File["/home/$user_name/$app_name"]
 }
 
+file { "/home/$user_name/bin" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755
+}
+
 file { "/home/$user_name/bin/ruby" :
   content => template("ruby"),
   owner => $user_name,
