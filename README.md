@@ -4,7 +4,7 @@ Tested on latest Ubuntu LTS (currently 12.04).
 
 Perfect to setup a CI server/Redmine/Discourse in a few minutes...
 
-This is is a fairly simple puppet script to provision an Ubuntu server with the following components:
+This is is a Capistrano script combined with a Puppet script to provision an Ubuntu server with the following components:
 
 - ufw & denyhosts for security (only ports 22/80 are opened)
 - postgresql
@@ -15,11 +15,9 @@ This is is a fairly simple puppet script to provision an Ubuntu server with the 
 
 ## Instructions
 
-    (on your local box)
+* Create config/deploy/production.rb using the sample file with the good server data. Be sure you can access to your server using the credentials in this file without having to type a password, ie. : by putting your public SSH key in ~/.ssh/authorized_keys, otherwise Capistrano will fail.
 
     $> bundle install
-
-    (edit config/deploy/production.rb with the good SSH authentication)
 
     $> bin/cap production provisioning
 
