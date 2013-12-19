@@ -99,12 +99,13 @@ rbenv::compile { $ruby_version :
   user => $user_name,
   home => "/home/$user_name",
   global => true,
-  require => User[$user_name]
+  require => Rbenv::Install[$user_name]
 }
 
 rbenv::gem { "passenger" :
   user => $user_name,
-  ruby => $ruby_version
+  ruby => $ruby_version,
+  require => Rbenv::Compile[$ruby_version]
 }
 
 exec { 'nginx-install' :
@@ -113,7 +114,8 @@ exec { 'nginx-install' :
   user    => $user_name,
   group   => $user_name,
   cwd     => "/home/${user_name}",
-  unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}"
+  unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}",
+  require => Rbenv::Gem["passenger"]
 }
 
 
@@ -171,7 +173,7 @@ file { "/home/$user_name/bin/ruby" :
   content => template("ruby"),
   owner => $user_name,
   group => $user_name,
-  require => User[$user_name],
+  require => File["/home/$user_name/bin"],
   mode => 755
 }
 
@@ -179,41 +181,46 @@ file { "/etc/init.d/nginx" :
   source  => "puppet:///files/nginx.init.d",
   owner   => root,
   group   => root,
-  mode    => 755
+  mode    => 755,
+  require => Exec["nginx-install"]
 }
 
 file { "/etc/default/nginx" :
   content => template("default/nginx"),
   owner   => root,
   group   => root,
-  mode    => 755
+  mode    => 755,
+  require => Exec["nginx-install"]
 }
 
 file { "/home/${user_name}/nginx/conf/nginx.conf" :
   content => template("nginx.conf"),
   owner   => $user_name,
-  group   => $user_name
+  group   => $user_name,
+  require => Exec["nginx-install"]
 }
 
 file { "/home/$user_name/nginx/conf/sites-available" :
-  ensure => 'directory',
-  owner => $user_name,
-  group => $user_name,
-  mode => 755
+  ensure  => 'directory',
+  owner   => $user_name,
+  group   => $user_name,
+  mode    => 755,
+  require => Exec["nginx-install"]
 }
 
 file { "/home/$user_name/nginx/conf/sites-enabled" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
-  mode => 755
+  mode => 755,
+  require => Exec["nginx-install"]
 }
 
 file { "/home/$user_name/nginx/conf/sites-available/default" :
   content => template("sites-available/default"),
   owner => $user_name,
   group => $user_name,
-  require => User[$user_name]
+  require => File["/home/$user_name/nginx/conf/sites-available"]
 }
 
 file { "/home/$user_name/nginx/conf/sites-enabled/default" :
@@ -227,7 +234,8 @@ file { "/home/$user_name/nginx/conf/sites-enabled/default" :
 
 service { "nginx" :
   ensure  => "running",
-  enable  => "true"
+  enable  => "true",
+  require => File["/etc/init.d/nginx"]
 }
 
 class { 'sudo' : }
