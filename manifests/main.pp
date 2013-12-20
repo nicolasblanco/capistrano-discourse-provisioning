@@ -247,7 +247,7 @@ file { "$home_path/nginx/conf/sites-enabled/default" :
 service { "nginx" :
   ensure  => "running",
   enable  => "true",
-  require => File["/etc/init.d/nginx"]
+  require => File["$home_path/nginx/conf/sites-enabled/default"]
 }
 
 class { 'sudo' : }
