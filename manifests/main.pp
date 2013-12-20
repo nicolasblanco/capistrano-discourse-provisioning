@@ -125,7 +125,7 @@ exec { 'nginx-install' :
   environment => ["HOME=${home_path}"],
   user    => $user_name,
   group   => $user_name,
-  cwd     => ${home_path},
+  cwd     => $home_path,
   unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}",
   require => Exec["rbenv::rehash"]
 }
