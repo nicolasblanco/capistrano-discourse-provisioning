@@ -3,7 +3,7 @@ import 'config.pp'
 $home_path = "/home/${user_name}"
 $passenger_nginx_install_dir = "${home_path}/nginx"
 $passenger_nginx_options = "--auto --auto-download --prefix=${passenger_nginx_install_dir}"
-$current_path = ["${home_path}/.rbenv/shims", "${home_path}/bin", '/bin', '/usr/bin']
+$current_path = ["${home_path}/.rbenv/shims", "${home_path}/.rbenv/bin", '/bin', '/usr/bin']
 
 class { 'apt':
   always_apt_update    => true,
