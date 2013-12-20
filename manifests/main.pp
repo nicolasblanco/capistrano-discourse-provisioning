@@ -1,7 +1,9 @@
 import 'config.pp'
 
-$passenger_nginx_install_dir = "/home/${user_name}/nginx"
+$home_path = "/home/${user_name}"
+$passenger_nginx_install_dir = "${home_path}/nginx"
 $passenger_nginx_options = "--auto --auto-download --prefix=${passenger_nginx_install_dir}"
+$path = ["${home_path}/.rbenv/shims", "${home_path}/bin", '/bin', '/usr/bin']
 
 class { 'apt':
   always_apt_update    => true,
@@ -77,12 +79,12 @@ user { $user_name :
   groups => 'admin',
   shell => '/bin/bash',
   managehome => true,
-  home => "/home/$user_name",
+  home => $home_path,
   password => $user_password,
   require => Group['admin']
 }
 
-file { "/home/$user_name/.ssh" :
+file { "${home_path}/.ssh" :
   owner => "$user_name",
   group => "$user_name",
   mode => 700,
@@ -97,7 +99,7 @@ rbenv::install { $user_name :
 
 rbenv::compile { $ruby_version :
   user => $user_name,
-  home => "/home/$user_name",
+  home => $home_path,
   global => true,
   require => Rbenv::Install[$user_name]
 }
@@ -108,14 +110,24 @@ rbenv::gem { "passenger" :
   require => Rbenv::Compile[$ruby_version]
 }
 
+exec { "rbenv::rehash" :
+  command     => "rbenv rehash",
+  user        => $user_name,
+  group       => $user_name,
+  cwd         => $home_path,
+  environment => ["HOME=${home_path}"],
+  path        => $path,
+  require     => Rbenv::Gem["passenger"]
+}
+
 exec { 'nginx-install' :
-  command => "/home/${user_name}/.rbenv/shims/passenger-install-nginx-module ${passenger_nginx_options}",
-  environment => ["HOME=/home/${user_name}"],
+  command => "${home_path}/.rbenv/shims/passenger-install-nginx-module ${passenger_nginx_options}",
+  environment => ["HOME=${home_path}"],
   user    => $user_name,
   group   => $user_name,
-  cwd     => "/home/${user_name}",
+  cwd     => ${home_path},
   unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}",
-  require => Rbenv::Gem["passenger"]
+  require => Exec["rbenv::rehash"]
 }
 
 
@@ -138,7 +150,7 @@ postgresql::server::db { $db_name :
 }
 
 # Create the application directory
-file { "/home/$user_name/$app_name" :
+file { "$home_path/$app_name" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
@@ -146,34 +158,34 @@ file { "/home/$user_name/$app_name" :
   require => User[$user_name]
 }
 
-file { "/home/$user_name/$app_name/releases" :
+file { "$home_path/$app_name/releases" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
   mode => 755,
-  require => File["/home/$user_name/$app_name"]
+  require => File["$home_path/$app_name"]
 }
 
-file { "/home/$user_name/$app_name/shared" :
+file { "$home_path/$app_name/shared" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
   mode => 755,
-  require => File["/home/$user_name/$app_name"]
+  require => File["$home_path/$app_name"]
 }
 
-file { "/home/$user_name/bin" :
+file { "$home_path/bin" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
   mode => 755
 }
 
-file { "/home/$user_name/bin/ruby" :
+file { "$home_path/bin/ruby" :
   content => template("ruby"),
   owner => $user_name,
   group => $user_name,
-  require => File["/home/$user_name/bin"],
+  require => File["$home_path/bin"],
   mode => 755
 }
 
@@ -193,14 +205,14 @@ file { "/etc/default/nginx" :
   require => Exec["nginx-install"]
 }
 
-file { "/home/${user_name}/nginx/conf/nginx.conf" :
+file { "$home_path/nginx/conf/nginx.conf" :
   content => template("nginx.conf"),
   owner   => $user_name,
   group   => $user_name,
   require => Exec["nginx-install"]
 }
 
-file { "/home/$user_name/nginx/conf/sites-available" :
+file { "$home_path/nginx/conf/sites-available" :
   ensure  => 'directory',
   owner   => $user_name,
   group   => $user_name,
@@ -208,7 +220,7 @@ file { "/home/$user_name/nginx/conf/sites-available" :
   require => Exec["nginx-install"]
 }
 
-file { "/home/$user_name/nginx/conf/sites-enabled" :
+file { "$home_path/nginx/conf/sites-enabled" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
@@ -216,19 +228,19 @@ file { "/home/$user_name/nginx/conf/sites-enabled" :
   require => Exec["nginx-install"]
 }
 
-file { "/home/$user_name/nginx/conf/sites-available/default" :
+file { "$home_path/nginx/conf/sites-available/default" :
   content => template("sites-available/default"),
   owner => $user_name,
   group => $user_name,
-  require => File["/home/$user_name/nginx/conf/sites-available"]
+  require => File["$home_path/nginx/conf/sites-available"]
 }
 
-file { "/home/$user_name/nginx/conf/sites-enabled/default" :
+file { "$home_path/nginx/conf/sites-enabled/default" :
   ensure => "link",
-  target => "/home/$user_name/nginx/conf/sites-available/default",
+  target => "$home_path/nginx/conf/sites-available/default",
   owner => $user_name,
   group => $user_name,
-  require => File["/home/$user_name/nginx/conf/sites-available/default"]
+  require => File["$home_path/nginx/conf/sites-available/default"]
 }
 
 
