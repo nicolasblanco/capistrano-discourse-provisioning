@@ -3,7 +3,7 @@ import 'config.pp'
 $home_path = "/home/${user_name}"
 $passenger_nginx_install_dir = "${home_path}/nginx"
 $passenger_nginx_options = "--auto --auto-download --prefix=${passenger_nginx_install_dir}"
-$path = ["${home_path}/.rbenv/shims", "${home_path}/bin", '/bin', '/usr/bin']
+$current_path = ["${home_path}/.rbenv/shims", "${home_path}/bin", '/bin', '/usr/bin']
 
 class { 'apt':
   always_apt_update    => true,
@@ -116,7 +116,7 @@ exec { "rbenv::rehash" :
   group       => $user_name,
   cwd         => $home_path,
   environment => ["HOME=${home_path}"],
-  path        => $path,
+  path        => $current_path,
   require     => Rbenv::Gem["passenger"]
 }
 
