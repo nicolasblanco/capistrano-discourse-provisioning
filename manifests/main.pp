@@ -61,6 +61,11 @@ package { 'libpq-dev' :
   require => Apt::Ppa["ppa:pitti/postgresql"]
 }
 
+package { 'postgresql-contrib' :
+  ensure => present,
+  require => Apt::Ppa["ppa:pitti/postgresql"]
+}
+
 # Install ImageMagick as it often cause problems with bundle install
 package { 'libmagickcore-dev' :
   ensure => present
