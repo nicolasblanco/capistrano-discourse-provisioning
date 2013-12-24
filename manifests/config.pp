@@ -8,5 +8,5 @@ $ruby_version = "2.0.0-p353"
 $user_password = 'your secret password hash'
 
 $db_name = "${app_name}_production"
-$db_user = 'rails'
+$db_user = 'web'
 $db_password = 'secret'

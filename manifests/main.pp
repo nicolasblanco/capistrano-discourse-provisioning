@@ -149,11 +149,19 @@ class { 'postgresql::server':
                                       'host    all             all             10.0.2.2/32             md5']
 }
 
+postgresql::server::role { $db_user :
+  password_hash => postgresql_password($db_user, $db_password),
+  superuser => true,
+  createdb  => true,
+  login     => true,
+  require   => Package['postgresql']
+}
+
 # Create the database
 postgresql::server::db { $db_name :
   user     => $db_user,
   password => $db_password,
-  require => Package['postgresql']
+  require  => Postgresql::Server::Role[$db_user]
 }
 
 # Create the application directory
