@@ -256,3 +256,7 @@ sudo::conf { $user_name :
   priority => 10,
   content  => "$user_name ALL=(ALL) NOPASSWD: ALL"
 }
+
+class { 'redis' :
+  version => '2.8.3',
+}
