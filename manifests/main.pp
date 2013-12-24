@@ -29,7 +29,9 @@ ufw::allow { "allow-http-from-all":
   port => 80
 }
 
-class { "denyhosts": }
+class { "denyhosts" : }
+
+class { 'redis' : }
 
 # Install required packages
 package { 'curl' :
