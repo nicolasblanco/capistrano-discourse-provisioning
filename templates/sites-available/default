@@ -15,7 +15,7 @@ events {
 
 
 http {
-    passenger_root /home/<%= @user_name %>/.rbenv/versions/<%= @ruby_version %>/lib/ruby/gems/2.0.0/gems/passenger-4.0.29;
+    passenger_root /home/<%= @user_name %>/.rbenv/versions/<%= @ruby_version %>/lib/ruby/gems/2.1.0/gems/passenger-4.0.29;
     passenger_ruby /home/<%= @user_name %>/bin/ruby;
 
     include       mime.types;
