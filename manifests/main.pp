@@ -143,6 +143,7 @@ class { 'postgresql::server':
   ip_mask_deny_postgres_user => '0.0.0.0/32',
   ip_mask_allow_all_users    => '127.0.0.1/32',
   listen_addresses           => 'localhost',
+  encoding                   => 'utf8',
   ipv4acls                   => [ 'local   all             postgres                                peer',
                                       'local   all             all                                     md5',
                                       'host    all             all             127.0.0.1/32            md5',
