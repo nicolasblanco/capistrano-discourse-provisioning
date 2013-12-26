@@ -39,14 +39,17 @@ http {
         listen       80;
         server_name  localhost;
 
+        passenger_enabled on;
+
+        root   /home/<%= @user_name %>/<%= @app_name %>/current/public;
+
         #charset koi8-r;
 
         #access_log  logs/host.access.log  main;
 
-        location / {
-            root   /home/<%= @user_name %>/<%= @app_name %>/current/public;
-            index  index.html index.htm;
-        }
+        #location / {
+        #    index  index.html index.htm;
+        #}
 
         #error_page  404              /404.html;
 
