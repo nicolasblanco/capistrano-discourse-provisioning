@@ -97,6 +97,14 @@ exec { 'god::install' :
   unless => "which god"
 }
 
+file { "/etc/init.d/god" :
+  content => template("god.init.d"),
+  owner   => root,
+  group   => root,
+  mode    => 755,
+  require => Exec["god::install"]
+}
+
 group { 'admin' :
   ensure => present
 }
