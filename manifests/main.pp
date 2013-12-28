@@ -16,6 +16,7 @@ class { 'apt':
 }
 
 apt::ppa { "ppa:pitti/postgresql" :}
+apt::ppa { "ppa:brightbox/ruby-ng-experimental" :}
 
 # Security : only allow ssh and http and installs deny hosts
 
@@ -75,6 +76,26 @@ package { 'libmagickwand-dev' :
   ensure => present
 }
 
+package { 'ruby2.0' :
+  ensure => present,
+  require => Apt::Ppa["ppa:brightbox/ruby-ng-experimental"]
+}
+
+package { 'ruby2.0-dev' :
+  ensure => present,
+  require => Package['ruby2.0']
+}
+
+package { 'ruby2.0-doc' :
+  ensure => present,
+  require => Package['ruby2.0']
+}
+
+exec { 'god::install' :
+  command => "gem2.0 install god --no-doc",
+  require => Package['ruby2.0-dev'],
+  unless => "which god"
+}
 
 group { 'admin' :
   ensure => present
