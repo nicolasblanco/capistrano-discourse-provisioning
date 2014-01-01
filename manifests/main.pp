@@ -97,6 +97,8 @@ exec { 'god::install' :
   unless => "which god"
 }
 
+class { 'ssmtp': }
+
 file { "/etc/init.d/god" :
   content => template("god.init.d"),
   owner   => root,
