@@ -94,10 +94,10 @@ package { 'ruby2.0-doc' :
 exec { 'god::install' :
   command => "gem2.0 install god --no-doc",
   require => Package['ruby2.0-dev'],
-  unless => "which god"
+  unless => "/usr/bin/which god"
 }
 
-class { 'ssmtp': }
+class { 'ssmtp' : }
 
 file { "/etc/init.d/god" :
   content => template("god.init.d"),
