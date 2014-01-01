@@ -199,6 +199,30 @@ postgresql::server::db { $db_name :
   require  => Postgresql::Server::Role[$db_user]
 }
 
+file { "/var/lib/postgresql/backup_all.sh" :
+  source  => "puppet:///files/backup_all.sh",
+  owner   => "postgres",
+  group   => "postgres",
+  mode    => 700,
+  require => Package['postgresql']
+}
+
+file { "/var/lib/postgresql/backups" :
+  ensure => 'directory',
+  owner => "postgres",
+  group => "postgres",
+  mode => 755,
+  require => File['/var/lib/postgresql/backup_all.sh']
+}
+
+cron { "backup_all" :
+  command => "/var/lib/postgresql/backup_all.sh",
+  user    => "postgres",
+  hour    => 2,
+  minute  => 0,
+  require => File["/var/lib/postgresql/backups"]
+}
+
 # Create the application directory
 file { "$home_path/$app_name" :
   ensure => 'directory',
