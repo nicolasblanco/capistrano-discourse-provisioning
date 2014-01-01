@@ -92,7 +92,7 @@ package { 'ruby2.0-doc' :
 }
 
 exec { 'god::install' :
-  command => "gem2.0 install god --no-doc",
+  command => "/usr/bin/gem2.0 install god --no-doc",
   require => Package['ruby2.0-dev'],
   unless => "/usr/bin/which god"
 }
