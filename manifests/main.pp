@@ -171,32 +171,35 @@ exec { 'nginx-install' :
   require => Exec["rbenv::rehash"]
 }
 
+if $install_postgresql == 'true' {
 
-# Configure postgres
-class { 'postgresql::server':
-  ip_mask_deny_postgres_user => '0.0.0.0/32',
-  ip_mask_allow_all_users    => '127.0.0.1/32',
-  listen_addresses           => 'localhost',
-  encoding                   => 'utf8',
-  ipv4acls                   => [ 'local   all             postgres                                peer',
-                                      'local   all             all                                     md5',
-                                      'host    all             all             127.0.0.1/32            md5',
-                                      'host    all             all             10.0.2.2/32             md5']
-}
+  # Configure postgres
+  class { 'postgresql::server':
+    ip_mask_deny_postgres_user => '0.0.0.0/32',
+    ip_mask_allow_all_users    => '127.0.0.1/32',
+    listen_addresses           => 'localhost',
+    encoding                   => 'utf8',
+    ipv4acls                   => [ 'local   all             postgres                                peer',
+                                        'local   all             all                                     md5',
+                                        'host    all             all             127.0.0.1/32            md5',
+                                        'host    all             all             10.0.2.2/32             md5']
+  }
 
-postgresql::server::role { $db_user :
-  password_hash => postgresql_password($db_user, $db_password),
-  superuser => true,
-  createdb  => true,
-  login     => true,
-  require   => Package['postgresql']
-}
+  postgresql::server::role { $db_user :
+    password_hash => postgresql_password($db_user, $db_password),
+    superuser => true,
+    createdb  => true,
+    login     => true,
+    require   => Package['postgresql']
+  }
 
-# Create the database
-postgresql::server::db { $db_name :
-  user     => $db_user,
-  password => $db_password,
-  require  => Postgresql::Server::Role[$db_user]
+  # Create the database
+  postgresql::server::db { $db_name :
+    user     => $db_user,
+    password => $db_password,
+    require  => Postgresql::Server::Role[$db_user]
+  }
+
 }
 
 file { "/var/lib/postgresql/backup_all.sh" :

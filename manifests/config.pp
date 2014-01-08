@@ -10,3 +10,5 @@ $user_password = 'your secret password hash'
 $db_name = "${app_name}_production"
 $db_user = 'web'
 $db_password = 'secret'
+
+$install_postgresql = "false"
