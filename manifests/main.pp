@@ -173,6 +173,68 @@ if $install_passenger == 'true' {
     unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}",
     require => Exec["rbenv::rehash"]
   }
+
+
+  file { "/etc/init.d/nginx" :
+    source  => "puppet:///files/nginx.init.d",
+    owner   => root,
+    group   => root,
+    mode    => 755,
+    require => Exec["nginx-install"]
+  }
+
+  file { "/etc/default/nginx" :
+    content => template("default/nginx"),
+    owner   => root,
+    group   => root,
+    mode    => 755,
+    require => Exec["nginx-install"]
+  }
+
+  file { "$home_path/nginx/conf/nginx.conf" :
+    content => template("nginx.conf"),
+    owner   => $user_name,
+    group   => $user_name,
+    require => Exec["nginx-install"]
+  }
+
+  file { "$home_path/nginx/conf/sites-available" :
+    ensure  => 'directory',
+    owner   => $user_name,
+    group   => $user_name,
+    mode    => 755,
+    require => Exec["nginx-install"]
+  }
+
+  file { "$home_path/nginx/conf/sites-enabled" :
+    ensure => 'directory',
+    owner => $user_name,
+    group => $user_name,
+    mode => 755,
+    require => Exec["nginx-install"]
+  }
+
+  file { "$home_path/nginx/conf/sites-available/default" :
+    content => template("sites-available/default"),
+    owner => $user_name,
+    group => $user_name,
+    require => File["$home_path/nginx/conf/sites-available"]
+  }
+
+  file { "$home_path/nginx/conf/sites-enabled/default" :
+    ensure => "link",
+    target => "$home_path/nginx/conf/sites-available/default",
+    owner => $user_name,
+    group => $user_name,
+    require => File["$home_path/nginx/conf/sites-available/default"]
+  }
+
+
+  service { "nginx" :
+    ensure  => "running",
+    enable  => "true",
+    require => File["$home_path/nginx/conf/sites-enabled/default"]
+  }
 }
 
 if $install_postgresql == 'true' {
@@ -268,67 +330,6 @@ file { "$home_path/bin/ruby" :
   group => $user_name,
   require => File["$home_path/bin"],
   mode => 755
-}
-
-file { "/etc/init.d/nginx" :
-  source  => "puppet:///files/nginx.init.d",
-  owner   => root,
-  group   => root,
-  mode    => 755,
-  require => Exec["nginx-install"]
-}
-
-file { "/etc/default/nginx" :
-  content => template("default/nginx"),
-  owner   => root,
-  group   => root,
-  mode    => 755,
-  require => Exec["nginx-install"]
-}
-
-file { "$home_path/nginx/conf/nginx.conf" :
-  content => template("nginx.conf"),
-  owner   => $user_name,
-  group   => $user_name,
-  require => Exec["nginx-install"]
-}
-
-file { "$home_path/nginx/conf/sites-available" :
-  ensure  => 'directory',
-  owner   => $user_name,
-  group   => $user_name,
-  mode    => 755,
-  require => Exec["nginx-install"]
-}
-
-file { "$home_path/nginx/conf/sites-enabled" :
-  ensure => 'directory',
-  owner => $user_name,
-  group => $user_name,
-  mode => 755,
-  require => Exec["nginx-install"]
-}
-
-file { "$home_path/nginx/conf/sites-available/default" :
-  content => template("sites-available/default"),
-  owner => $user_name,
-  group => $user_name,
-  require => File["$home_path/nginx/conf/sites-available"]
-}
-
-file { "$home_path/nginx/conf/sites-enabled/default" :
-  ensure => "link",
-  target => "$home_path/nginx/conf/sites-available/default",
-  owner => $user_name,
-  group => $user_name,
-  require => File["$home_path/nginx/conf/sites-available/default"]
-}
-
-
-service { "nginx" :
-  ensure  => "running",
-  enable  => "true",
-  require => File["$home_path/nginx/conf/sites-enabled/default"]
 }
 
 class { 'sudo' : }
