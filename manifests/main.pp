@@ -79,6 +79,10 @@ package { 'libmagickwand-dev' :
   ensure => present
 }
 
+package { 'postfix' :
+  ensure => present
+}
+
 package { 'ruby2.0' :
   ensure => present,
   require => Apt::Ppa["ppa:brightbox/ruby-ng-experimental"]
@@ -145,30 +149,32 @@ rbenv::compile { $ruby_version :
   require => Rbenv::Install[$user_name]
 }
 
-rbenv::gem { "passenger" :
-  user => $user_name,
-  ruby => $ruby_version,
-  require => Rbenv::Compile[$ruby_version]
-}
+if $install_passenger == 'true' {
+  rbenv::gem { "passenger" :
+    user => $user_name,
+    ruby => $ruby_version,
+    require => Rbenv::Compile[$ruby_version]
+  }
 
-exec { "rbenv::rehash" :
-  command     => "rbenv rehash",
-  user        => $user_name,
-  group       => $user_name,
-  cwd         => $home_path,
-  environment => ["HOME=${home_path}"],
-  path        => $current_path,
-  require     => Rbenv::Gem["passenger"]
-}
+  exec { "rbenv::rehash" :
+    command     => "rbenv rehash",
+    user        => $user_name,
+    group       => $user_name,
+    cwd         => $home_path,
+    environment => ["HOME=${home_path}"],
+    path        => $current_path,
+    require     => Rbenv::Gem["passenger"]
+  }
 
-exec { 'nginx-install' :
-  command => "${home_path}/.rbenv/shims/passenger-install-nginx-module ${passenger_nginx_options}",
-  environment => ["HOME=${home_path}"],
-  user    => $user_name,
-  group   => $user_name,
-  cwd     => $home_path,
-  unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}",
-  require => Exec["rbenv::rehash"]
+  exec { 'nginx-install' :
+    command => "${home_path}/.rbenv/shims/passenger-install-nginx-module ${passenger_nginx_options}",
+    environment => ["HOME=${home_path}"],
+    user    => $user_name,
+    group   => $user_name,
+    cwd     => $home_path,
+    unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}",
+    require => Exec["rbenv::rehash"]
+  }
 }
 
 if $install_postgresql == 'true' {
@@ -200,30 +206,30 @@ if $install_postgresql == 'true' {
     require  => Postgresql::Server::Role[$db_user]
   }
 
-}
+  file { "/var/lib/postgresql/backup_all.sh" :
+    source  => "puppet:///files/backup_all.sh",
+    owner   => "postgres",
+    group   => "postgres",
+    mode    => 700,
+    require => Package['postgresql']
+  }
 
-file { "/var/lib/postgresql/backup_all.sh" :
-  source  => "puppet:///files/backup_all.sh",
-  owner   => "postgres",
-  group   => "postgres",
-  mode    => 700,
-  require => Package['postgresql']
-}
+  file { "/var/lib/postgresql/backups" :
+    ensure => 'directory',
+    owner => "postgres",
+    group => "postgres",
+    mode => 755,
+    require => File['/var/lib/postgresql/backup_all.sh']
+  }
 
-file { "/var/lib/postgresql/backups" :
-  ensure => 'directory',
-  owner => "postgres",
-  group => "postgres",
-  mode => 755,
-  require => File['/var/lib/postgresql/backup_all.sh']
-}
+  cron { "backup_all" :
+    command => "/var/lib/postgresql/backup_all.sh",
+    user    => "postgres",
+    hour    => 2,
+    minute  => 0,
+    require => File["/var/lib/postgresql/backups"]
+  }
 
-cron { "backup_all" :
-  command => "/var/lib/postgresql/backup_all.sh",
-  user    => "postgres",
-  hour    => 2,
-  minute  => 0,
-  require => File["/var/lib/postgresql/backups"]
 }
 
 # Create the application directory
