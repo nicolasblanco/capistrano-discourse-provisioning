@@ -1,9 +1,6 @@
 import 'config.pp'
 
 $home_path = "/home/${user_name}"
-$passenger_nginx_install_dir = "${home_path}/nginx"
-$passenger_nginx_options = "--auto --auto-download --prefix=${passenger_nginx_install_dir}"
-$current_path = ["${home_path}/.rbenv/shims", "${home_path}/.rbenv/bin", '/bin', '/usr/bin']
 
 class { 'apt':
   always_apt_update    => true,
@@ -38,6 +35,49 @@ class { 'redis' : }
 package { 'curl' :
   ensure => present
 }
+
+package { 'nginx' :
+  ensure => present
+}
+
+file { "/etc/nginx/nginx.conf" :
+  content => template("nginx.conf"),
+  owner   => root,
+  group   => root,
+  mode    => 644,
+  require => Package["nginx"]
+}
+
+file { "/etc/nginx/sites-available" :
+  ensure => 'directory',
+  owner => root,
+  group => root,
+  mode => 755,
+  require => Package["nginx"]
+}
+
+file { "/etc/nginx/sites-enabled" :
+  ensure => 'directory',
+  owner => root,
+  group => root,
+  mode => 755,
+  require => Package["nginx"]
+}
+
+file { "/etc/nginx/sites-available/discourse" :
+  content => template("sites-available/discourse"),
+  owner   => root,
+  group   => root,
+  mode    => 644,
+  require => File["/etc/nginx/sites-available"]
+}
+
+file { "/etc/nginx/sites-enabled/discourse" :
+  ensure => 'link',
+  target => '/etc/nginx/sites-available/discourse',
+  require => File["/etc/nginx/sites-available/discourse"]
+}
+
 
 package { 'libcurl4-openssl-dev' :
   ensure => present
@@ -147,151 +187,6 @@ rbenv::compile { $ruby_version :
   require => Rbenv::Install[$user_name]
 }
 
-if $install_passenger == 'true' {
-  rbenv::gem { "passenger" :
-    user => $user_name,
-    ruby => $ruby_version,
-    require => Rbenv::Compile[$ruby_version]
-  }
-
-  exec { "rbenv::rehash" :
-    command     => "rbenv rehash",
-    user        => $user_name,
-    group       => $user_name,
-    cwd         => $home_path,
-    environment => ["HOME=${home_path}"],
-    path        => $current_path,
-    require     => Rbenv::Gem["passenger"]
-  }
-
-  exec { 'nginx-install' :
-    command => "${home_path}/.rbenv/shims/passenger-install-nginx-module ${passenger_nginx_options}",
-    environment => ["HOME=${home_path}"],
-    user    => $user_name,
-    group   => $user_name,
-    cwd     => $home_path,
-    unless  => "/usr/bin/test -d ${passenger_nginx_install_dir}",
-    require => Exec["rbenv::rehash"]
-  }
-
-
-  file { "/etc/init.d/nginx" :
-    source  => "puppet:///files/nginx.init.d",
-    owner   => root,
-    group   => root,
-    mode    => 755,
-    require => Exec["nginx-install"]
-  }
-
-  file { "/etc/default/nginx" :
-    content => template("default/nginx"),
-    owner   => root,
-    group   => root,
-    mode    => 755,
-    require => Exec["nginx-install"]
-  }
-
-  file { "$home_path/nginx/conf/nginx.conf" :
-    content => template("nginx.conf"),
-    owner   => $user_name,
-    group   => $user_name,
-    require => Exec["nginx-install"]
-  }
-
-  file { "$home_path/nginx/conf/sites-available" :
-    ensure  => 'directory',
-    owner   => $user_name,
-    group   => $user_name,
-    mode    => 755,
-    require => Exec["nginx-install"]
-  }
-
-  file { "$home_path/nginx/conf/sites-enabled" :
-    ensure => 'directory',
-    owner => $user_name,
-    group => $user_name,
-    mode => 755,
-    require => Exec["nginx-install"]
-  }
-
-  file { "$home_path/nginx/conf/sites-available/default" :
-    content => template("sites-available/default"),
-    owner => $user_name,
-    group => $user_name,
-    require => File["$home_path/nginx/conf/sites-available"]
-  }
-
-  file { "$home_path/nginx/conf/sites-enabled/default" :
-    ensure => "link",
-    target => "$home_path/nginx/conf/sites-available/default",
-    owner => $user_name,
-    group => $user_name,
-    require => File["$home_path/nginx/conf/sites-available/default"]
-  }
-
-
-  service { "nginx" :
-    ensure  => "running",
-    enable  => "true",
-    require => File["$home_path/nginx/conf/sites-enabled/default"]
-  }
-}
-
-if $install_postgresql == 'true' {
-
-  # Configure postgres
-  class { 'postgresql::server':
-    ip_mask_deny_postgres_user => '0.0.0.0/32',
-    ip_mask_allow_all_users    => '127.0.0.1/32',
-    listen_addresses           => 'localhost',
-    encoding                   => 'utf8',
-    ipv4acls                   => [ 'local   all             postgres                                peer',
-                                        'local   all             all                                     md5',
-                                        'host    all             all             127.0.0.1/32            md5',
-                                        'host    all             all             10.0.2.2/32             md5']
-  }
-
-  postgresql::server::role { $db_user :
-    password_hash => postgresql_password($db_user, $db_password),
-    superuser => true,
-    createdb  => true,
-    login     => true,
-    require   => Package['postgresql']
-  }
-
-  # Create the database
-  postgresql::server::db { $db_name :
-    user     => $db_user,
-    password => $db_password,
-    require  => Postgresql::Server::Role[$db_user]
-  }
-
-  file { "/var/lib/postgresql/backup_all.sh" :
-    source  => "puppet:///files/backup_all.sh",
-    owner   => "postgres",
-    group   => "postgres",
-    mode    => 700,
-    require => Package['postgresql']
-  }
-
-  file { "/var/lib/postgresql/backups" :
-    ensure => 'directory',
-    owner => "postgres",
-    group => "postgres",
-    mode => 755,
-    require => File['/var/lib/postgresql/backup_all.sh']
-  }
-
-  cron { "backup_all" :
-    command => "/var/lib/postgresql/backup_all.sh",
-    user    => "postgres",
-    hour    => 2,
-    minute  => 0,
-    require => File["/var/lib/postgresql/backups"]
-  }
-
-}
-
 # Create the application directory
 file { "$home_path/$app_name" :
   ensure => 'directory',
@@ -315,6 +210,70 @@ file { "$home_path/$app_name/shared" :
   group => $user_name,
   mode => 755,
   require => File["$home_path/$app_name"]
+}
+
+file { "$home_path/$app_name/shared/log" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/tmp" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/sockets" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/pids" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/config" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/config/thin.yml" :
+  content => template("thin.yml"),
+  owner   => $user_name,
+  group   => $user_name,
+  mode    => 644,
+  require => File["$home_path/$app_name/shared/config"]
+}
+
+file { "$home_path/$app_name/shared/config/sidekiq.yml" :
+  content => template("sidekiq.yml"),
+  owner   => $user_name,
+  group   => $user_name,
+  mode    => 644,
+  require => File["$home_path/$app_name/shared/config"]
+}
+
+file { "$home_path/$app_name/shared/config/discourse.conf" :
+  content => template("discourse.conf"),
+  owner   => $user_name,
+  group   => $user_name,
+  mode    => 644,
+  require => File["$home_path/$app_name/shared/config"]
 }
 
 file { "$home_path/bin" :

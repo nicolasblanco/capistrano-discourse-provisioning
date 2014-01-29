@@ -10,6 +10,6 @@ $user_password = 'your secret password hash wooz'
 $db_name = "${app_name}_production"
 $db_user = 'web'
 $db_password = 'secret'
+$db_host = ''
 
-$install_postgresql = "false"
-$install_passenger = "false"
+$host_name = 'example.com'
