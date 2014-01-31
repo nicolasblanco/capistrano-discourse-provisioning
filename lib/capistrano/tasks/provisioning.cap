@@ -5,6 +5,7 @@ def from_template(file)
   StringIO.new(ERB.new(template).result(binding))
 end
 
+desc 'Provisioning'
 task :provisioning do |host|
   on roles(:app), in: :parallel do
     execute "sudo apt-get update"
