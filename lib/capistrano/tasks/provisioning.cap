@@ -1,6 +1,15 @@
+def from_template(file)
+  require 'erb'
+  template = File.read(File.join(File.dirname(__FILE__), "..", file))
+
+  StringIO.new(ERB.new(template).result(binding))
+end
+
 task :provisioning do |host|
   on roles(:app), in: :parallel do
+    execute "sudo apt-get update"
     execute "sudo apt-get install -y git"
+
     execute "rm -rf /etc/puppet"
     execute "sudo git clone https://github.com/slainer68/my-rails-puppet.git /etc/puppet"
 
@@ -8,6 +17,8 @@ task :provisioning do |host|
     execute "sudo dpkg -i puppetlabs-release-precise.deb"
     execute "sudo apt-get update"
     execute "sudo apt-get install -y puppet-common"
+
+    upload! from_template('templates/config.pp'), '/etc/puppet/manifests/config.pp'
 
     execute "sudo puppet apply /etc/puppet/manifests/main.pp"
   end

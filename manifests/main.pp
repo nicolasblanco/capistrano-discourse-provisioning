@@ -53,7 +53,7 @@ file { "/etc/nginx/sites-available" :
   owner => root,
   group => root,
   mode => 755,
-  require => Package["nginx"]
+  require => File["/etc/nginx/nginx.conf"]
 }
 
 file { "/etc/nginx/sites-enabled" :
@@ -61,7 +61,7 @@ file { "/etc/nginx/sites-enabled" :
   owner => root,
   group => root,
   mode => 755,
-  require => Package["nginx"]
+  require => File["/etc/nginx/sites-available"]
 }
 
 file { "/etc/nginx/sites-available/discourse" :
@@ -78,6 +78,11 @@ file { "/etc/nginx/sites-enabled/discourse" :
   require => File["/etc/nginx/sites-available/discourse"]
 }
 
+service { "nginx" :
+  ensure  => "running",
+  enable  => "true",
+  require => File["/etc/nginx/sites-enabled/discourse"]
+}
 
 package { 'libcurl4-openssl-dev' :
   ensure => present
@@ -92,17 +97,7 @@ package { 'python-software-properties' :
   ensure => present
 }
 
-package { 'postgresql' :
-  ensure => present,
-  require => Apt::Ppa["ppa:pitti/postgresql"]
-}
-
 package { 'libpq-dev' :
-  ensure => present,
-  require => Apt::Ppa["ppa:pitti/postgresql"]
-}
-
-package { 'postgresql-contrib' :
   ensure => present,
   require => Apt::Ppa["ppa:pitti/postgresql"]
 }
@@ -123,24 +118,24 @@ package { 'postfix' :
   ensure => present
 }
 
-package { 'ruby2.0' :
+package { 'ruby2.1' :
   ensure => present,
   require => Apt::Ppa["ppa:brightbox/ruby-ng-experimental"]
 }
 
-package { 'ruby2.0-dev' :
+package { 'ruby2.1-dev' :
   ensure => present,
-  require => Package['ruby2.0']
+  require => Package['ruby2.1']
 }
 
-package { 'ruby2.0-doc' :
+package { 'ruby2.1-doc' :
   ensure => present,
-  require => Package['ruby2.0']
+  require => Package['ruby2.1']
 }
 
 exec { 'god::install' :
-  command => "/usr/bin/gem2.0 install god --no-doc",
-  require => Package['ruby2.0-dev'],
+  command => "/usr/bin/gem2.1 install god --no-doc",
+  require => Package['ruby2.1-dev'],
   unless => "/usr/bin/which god"
 }
 
@@ -245,6 +240,22 @@ file { "$home_path/$app_name/shared/pids" :
 }
 
 file { "$home_path/$app_name/shared/config" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/plugins" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/uploads" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
