@@ -81,7 +81,8 @@ file { "/etc/nginx/sites-enabled/discourse" :
 service { "nginx" :
   ensure  => "running",
   enable  => "true",
-  require => File["/etc/nginx/sites-enabled/discourse"]
+  require => Package["nginx"],
+  subscribe => File["/etc/nginx/sites-enabled/discourse"]
 }
 
 package { 'libcurl4-openssl-dev' :
@@ -116,6 +117,45 @@ package { 'libmagickwand-dev' :
 
 package { 'postfix' :
   ensure => present
+}
+
+file { "/etc/postfix/sasl" :
+  ensure => 'directory',
+  owner => root,
+  group => root,
+  mode => 755,
+  require => Package["postfix"]
+}
+
+file { "/etc/postfix/sasl/passwd" :
+  content => template("postfix/sasl/passwd"),
+  owner   => root,
+  group   => root,
+  mode    => 600,
+  require => File["/etc/postfix/sasl"]
+}
+
+exec { 'postfix::postmap' :
+  command => "postmap /etc/postfix/sasl/passwd",
+  require => File['/etc/postfix/sasl/passwd'],
+  subscribe => File["/etc/postfix/sasl/passwd"],
+  refreshonly => true,
+  notify => Service["postfix"]
+}
+
+file { "/etc/postfix/main.cf" :
+  content => template("postfix/main.cf"),
+  owner   => root,
+  group   => root,
+  mode    => 644,
+  require => Package["postfix"]
+}
+
+service { "postfix" :
+  ensure  => "running",
+  enable  => "true",
+  require => Package["postfix"],
+  subscribe => File["/etc/postfix/main.cf"]
 }
 
 package { 'ruby2.1' :

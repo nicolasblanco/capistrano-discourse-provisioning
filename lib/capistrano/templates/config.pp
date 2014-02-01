@@ -13,3 +13,5 @@ $db_password = '<%= ENV["DB_PASSWORD"] %>'
 $db_host = '<%= ENV["DB_HOST"] %>'
 
 $host_name = '<%= ENV["HOST_NAME"] %>'
+$mandrill_username = '<%= ENV["MANDRILL_USERNAME"] %>'
+$mandrill_api_key = '<%= ENV["MANDRILL_API_KEY"] %>'

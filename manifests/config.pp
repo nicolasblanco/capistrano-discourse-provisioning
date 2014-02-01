@@ -13,3 +13,5 @@ $db_password = 'secret'
 $db_host = ''
 
 $host_name = 'example.com'
+$mandrill_username = ''
+$mandrill_api_key = ''
