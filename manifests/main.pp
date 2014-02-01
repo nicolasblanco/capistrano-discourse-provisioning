@@ -136,7 +136,7 @@ file { "/etc/postfix/sasl/passwd" :
 }
 
 exec { 'postfix::postmap' :
-  command => "postmap /etc/postfix/sasl/passwd",
+  command => "/usr/sbin/postmap /etc/postfix/sasl/passwd",
   require => File['/etc/postfix/sasl/passwd'],
   subscribe => File["/etc/postfix/sasl/passwd"],
   refreshonly => true,
