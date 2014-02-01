@@ -166,7 +166,17 @@ file { "${home_path}/.ssh" :
   owner => "$user_name",
   group => "$user_name",
   mode => 700,
-  ensure => 'directory'
+  ensure => 'directory',
+  require => User[$user_name]
+}
+
+file { "${home_path}/.ssh/authorized_keys" :
+  owner => "$user_name",
+  group => "$user_name",
+  mode => 600,
+  source => 'puppet:///files/authorized_keys',
+  ensure => present,
+  require => File["${home_path}/.ssh"]
 }
 
 # Setup rbenv
