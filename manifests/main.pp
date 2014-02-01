@@ -255,12 +255,28 @@ file { "$home_path/$app_name/shared/plugins" :
   require => File["$home_path/$app_name/shared"]
 }
 
-file { "$home_path/$app_name/shared/uploads" :
+file { "$home_path/$app_name/shared/public" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
   mode => 755,
   require => File["$home_path/$app_name/shared"]
+}
+
+file { "$home_path/$app_name/shared/public/system" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared/public"]
+}
+
+file { "$home_path/$app_name/shared/public/uploads" :
+  ensure => 'directory',
+  owner => $user_name,
+  group => $user_name,
+  mode => 755,
+  require => File["$home_path/$app_name/shared/public"]
 }
 
 file { "$home_path/$app_name/shared/config/thin.yml" :
