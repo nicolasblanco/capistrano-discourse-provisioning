@@ -7,7 +7,7 @@ end
 
 desc 'Provisioning'
 task :provisioning do |host|
-  on roles(:app), in: :parallel do
+  on roles(:app) do
     execute "sudo apt-get update"
     execute "sudo apt-get install -y git"
 
@@ -20,7 +20,7 @@ task :provisioning do |host|
     execute "sudo apt-get install -y puppet-common"
 
     upload! from_template('templates/config.pp'), '/etc/puppet/manifests/config.pp'
-    upload! "~/.ssh/id_rsa.pub", '/etc/puppet/files/authorized_keys'
+    upload! File.expand_path("~/.ssh/id_rsa.pub"), '/etc/puppet/files/authorized_keys'
 
     execute "sudo puppet apply /etc/puppet/manifests/main.pp"
   end
