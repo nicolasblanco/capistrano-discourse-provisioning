@@ -214,7 +214,7 @@ file { "${home_path}/.ssh/authorized_keys" :
   owner => "$user_name",
   group => "$user_name",
   mode => 600,
-  source => 'puppet:///files/authorized_keys',
+  source => '/root/.ssh/authorized_keys',
   ensure => present,
   require => File["${home_path}/.ssh"]
 }
