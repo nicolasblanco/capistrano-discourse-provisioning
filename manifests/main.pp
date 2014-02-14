@@ -40,6 +40,10 @@ package { 'nginx' :
   ensure => present
 }
 
+package { 'htop' :
+  ensure => present
+}
+
 file { "/etc/nginx/nginx.conf" :
   content => template("nginx.conf"),
   owner   => root,
@@ -230,6 +234,12 @@ rbenv::compile { $ruby_version :
   home => $home_path,
   global => true,
   require => Rbenv::Install[$user_name]
+}
+
+rbenv::gem { "thin" :
+  user => $user_name,
+  ruby => $ruby_version,
+  require => Rbenv::Compile[$ruby_version]
 }
 
 # Create the application directory
