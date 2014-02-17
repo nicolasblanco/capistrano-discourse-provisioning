@@ -119,6 +119,10 @@ package { 'libmagickwand-dev' :
   ensure => present
 }
 
+package { 'postgresql-client' :
+  ensure => present
+}
+
 package { 'postfix' :
   ensure => present
 }
