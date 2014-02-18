@@ -1,4 +1,5 @@
 import 'config.pp'
+import 'swap.pp'
 
 $home_path = "/home/${user_name}"
 
