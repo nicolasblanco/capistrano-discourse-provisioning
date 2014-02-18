@@ -15,6 +15,10 @@ class { 'apt':
 apt::ppa { "ppa:pitti/postgresql" :}
 apt::ppa { "ppa:brightbox/ruby-ng-experimental" :}
 
+common::swap { 'swap':
+  ensure => present
+}
+
 # Security : only allow ssh and http and installs deny hosts
 
 include ufw
