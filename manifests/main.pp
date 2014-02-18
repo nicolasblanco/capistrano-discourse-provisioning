@@ -372,6 +372,18 @@ file { "$home_path/$app_name/shared/config/discourse.conf" :
   require => File["$home_path/$app_name/shared/config"]
 }
 
+file_line { "rack env" :
+  ensure  => $ensure,
+  line    => "export RACK_ENV=production",
+  path    => "$home_path/.profile"
+}
+
+file_line { "rails env" :
+  ensure  => $ensure,
+  line    => "export RAILS_ENV=production",
+  path    => "$home_path/.profile"
+}
+
 file { "$home_path/bin" :
   ensure => 'directory',
   owner => $user_name,
