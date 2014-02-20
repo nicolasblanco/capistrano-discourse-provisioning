@@ -5,8 +5,8 @@ address: 0.0.0.0
 port: 3000
 timeout: 30
 log: "/home/web/app/shared/log/thin.log"
-pid: "/home/web/app/shared/pids/thin.pid"
-socket: "/home/web/app/shared/sockets/thin.sock"
+pid: "/home/web/app/shared/tmp/pids/thin.pid"
+socket: "/home/web/app/shared/tmp/sockets/thin.sock"
 max_conns: 1024
 max_persistent_conns: 100
 require: []

@@ -1,0 +1,9 @@
+check process thin-0 with pidfile /home/web/app/shared/tmp/pids/thin.0.pid
+        start program = "/bin/su - web -c 'cd /home/web/app/current && RUBY_GC_MALLOC_LIMIT=90000000 bundle exec thin -C config/thin.yml restart'"
+        stop program =  "/bin/su - web -c 'cd /home/web/app/current && RUBY_GC_MALLOC_LIMIT=90000000 bundle exec thin -C config/thin.yml restart'"
+        group thin
+
+check process thin-1 with pidfile /home/web/app/shared/tmp/pids/thin.1.pid
+        start program = "/bin/su - web -c 'cd /home/web/app/current && RUBY_GC_MALLOC_LIMIT=90000000 bundle exec thin -C config/thin.yml restart'"
+        stop program =  "/bin/su - web -c 'cd /home/web/app/current && RUBY_GC_MALLOC_LIMIT=90000000 bundle exec thin -C config/thin.yml restart'"
+        group thin

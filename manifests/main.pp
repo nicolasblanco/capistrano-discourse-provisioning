@@ -128,6 +128,24 @@ package { 'postgresql-client' :
   ensure => present
 }
 
+package { 'monit' :
+  ensure => present
+}
+
+file { "/etc/monit/conf.d/thin" :
+  content => template("monit/thin"),
+  owner   => root,
+  group   => root,
+  require => Package["monit"]
+}
+
+file { "/etc/monit/conf.d/sidekiq" :
+  content => template("monit/sidekiq"),
+  owner   => root,
+  group   => root,
+  require => Package["monit"]
+}
+
 package { 'postfix' :
   ensure => present
 }
@@ -292,20 +310,20 @@ file { "$home_path/$app_name/shared/tmp" :
   require => File["$home_path/$app_name/shared"]
 }
 
-file { "$home_path/$app_name/shared/sockets" :
+file { "$home_path/$app_name/shared/tmp/sockets" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
   mode => 755,
-  require => File["$home_path/$app_name/shared"]
+  require => File["$home_path/$app_name/shared/tmp"]
 }
 
-file { "$home_path/$app_name/shared/pids" :
+file { "$home_path/$app_name/shared/tmp/pids" :
   ensure => 'directory',
   owner => $user_name,
   group => $user_name,
   mode => 755,
-  require => File["$home_path/$app_name/shared"]
+  require => File["$home_path/$app_name/shared/tmp"]
 }
 
 file { "$home_path/$app_name/shared/config" :
