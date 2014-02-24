@@ -15,7 +15,7 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH="/home/web/.rbenv/bin:/home/web/.rbenv/shims:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
-RBENV_VERSION=2.1.0
+RBENV_VERSION=2.1.1
 
 DESC="God Monitoring Tool"
 NAME=god
