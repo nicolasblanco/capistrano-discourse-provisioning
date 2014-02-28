@@ -1,3 +1,3 @@
-check process sidekiq with pidfile /home/web/app/shared/tmp/pids/sidekiq.pid
+check process discourse-sidekiq with pidfile /home/web/app/shared/tmp/pids/sidekiq.pid
         start program = "/bin/su - web -c 'cd /home/web/app/current && RUBY_GC_MALLOC_LIMIT=90000000 bundle exec sidekiq -d -i 0 -P tmp/pids/sidekiq.pid -e production -C /home/web/app/current/config/sidekiq.yml -L /home/web/app/current/log/sidekiq.log'"
         stop program = "/bin/su - web -c 'cd /home/web/app/current && RUBY_GC_MALLOC_LIMIT=90000000 bundle exec sidekiq -d -i 0 -P tmp/pids/sidekiq.pid -e production -C /home/web/app/current/config/sidekiq.yml -L /home/web/app/current/log/sidekiq.log'"

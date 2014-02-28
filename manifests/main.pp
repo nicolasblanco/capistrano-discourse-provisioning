@@ -132,6 +132,13 @@ package { 'monit' :
   ensure => present
 }
 
+file { "/etc/monit/monitrc" :
+  content => template("monit/monitrc"),
+  owner   => root,
+  group   => root,
+  require => Package["monit"]
+}
+
 file { "/etc/monit/conf.d/thin" :
   content => template("monit/thin"),
   owner   => root,
