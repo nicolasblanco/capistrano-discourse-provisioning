@@ -25,7 +25,8 @@ common::swap { 'swap':
 include ufw
 
 ufw::allow { "allow-ssh-from-all":
-  port => 22
+  port => 22,
+  ip => "any"
 }
 
 ufw::allow { "allow-http-from-all":
